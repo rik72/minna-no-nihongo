@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  app:
+    build:
+      args:
+        user: ${ENV_USERNAME}
+        uid: ${ENV_UID}
+      context: ./
+      dockerfile: Dockerfile
+    image: minna-no-nihongo-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - .:/var/www:cached
+    networks:
+      - minna-no-nihongo
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www:cached
+      - ./docker-compose/nginx:/etc/nginx/conf.d/:cached
+    networks:
+      - minna-no-nihongo
+
+  db:
+    image: postgres:14.1-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    working_dir: /application
+    volumes:
+      - ./docker-compose/postgres:/application:cached
+      - ./docker-compose/postgres/data:/var/lib/postgresql/data:cached
+      - ./docker-compose/postgres/pg-init:/docker-entrypoint-initdb.d:cached
+    networks:
+      - minna-no-nihongo
+
+networks:
+  minna-no-nihongo:
+    driver: bridge
