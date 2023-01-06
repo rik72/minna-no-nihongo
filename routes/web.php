@@ -13,6 +13,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', function () { return view('home'); })->name('home');
+Route::get('/generator', function () { return view('generator'); })->name('generator');
